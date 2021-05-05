@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import ImageTk, Image
 
+
 window = Tk()
 
 window.title("Ứng dụng điểm danh nhân diện")
