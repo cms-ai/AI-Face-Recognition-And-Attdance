@@ -1,15 +1,8 @@
 from tkinter import *
+class App:
+    def Home(root):
+        self.root = root
+        self.root.title("Register System")
+        self.root.geometry("1199x600+100+50")
+        self.root.resizable(False, False)
 
-
-def Home():
-    window = Tk()
-
-    window.title("Trang chủ-------- Author-Trần Công Ái")
-
-    window.geometry('1366x768')
-    window.resizable(False,False)
-    window.mainloop()
-
-
-if __name__ == "__main__":
-    Home()
