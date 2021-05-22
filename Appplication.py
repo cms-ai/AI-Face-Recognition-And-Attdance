@@ -135,9 +135,16 @@ class Student:
         self.khoaMenu.config(font=("times new roman",12), bg="#e0dede", bd=0)
         self.khoaMenu.place(x=250, y=260, width=180)
 
+    
+        
         btn_Submit = Button(left_Frame, text="Lưu vào CSDL", font=("times new roman",13,"bold"))
         btn_Submit.place(x=80, y=350, height=50, width=300)
 
+        #Right Frame
+        right_frame = Frame(self.root,bg="lightgray")
+        right_frame.place(x=500, y=0, width=500, height=600)
+
+        
     
 root = Tk()
 obj = Student(root)
