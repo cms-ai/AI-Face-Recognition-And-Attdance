@@ -90,7 +90,7 @@ class Home:
         self.add_St1 = Button(frame_home,command=self.add_attandance_window, text="Điểm danh", font=("times new roman",18,"bold"))
         self.add_St1.place(x=300, y=400,width=170, height=80)
 
-        self.add_St = Button(frame_home, text="Quản lý", font=("times new roman",18,"bold"))
+        self.add_St = Button(frame_home,command=self.add_management_window, text="Quản lý", font=("times new roman",18,"bold"))
         self.add_St.place(x=500, y=400,width=170, height=80)
 
         self.add_St = Button(frame_home, text="Báo cáo", font=("times new roman",18,"bold"))
@@ -106,6 +106,11 @@ class Home:
         self.root.withdraw()
         topLevel1 =  Toplevel(self.root)
         app1 = Attandance(topLevel1)
+
+    def add_management_window(self):
+        self.root.withdraw()
+        topLevel1 =  Toplevel(self.root)
+        app1 = Course(topLevel1)
 
 class Student:
     def __init__(self, root):
@@ -366,8 +371,125 @@ class Attandance:
 
     
 
+# GUI Quản lý
+class Course:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Quản lý-Author Trần Công Ái")
+        self.root.geometry("1000x600+200+50")
+        self.root.resizable(False, False)
 
-        
+        left_Frame = Frame(self.root, bg="white")
+        left_Frame.place(x=0,y=0,width=600, height=600)
+
+
+        lbl_1 = Label(left_Frame, text="Quản lý môn học",fg="red", bg="white", font=("times new roman",28,"bold"))
+        lbl_1.place(x=0, y=30, relwidth=1)
+
+        lbl_2 = Label(left_Frame, text="Course", bg="white",fg="gray", font=("times new roman",12,"bold"))
+        lbl_2.place(x=50, y=150)
+
+
+        lbl_3 = Label(left_Frame, text="Start at", bg="white",fg="gray", font=("times new roman",12,"bold"))
+        lbl_3.place(x=250, y=150)
+
+        right_frame = Frame(self.root,bg="lightgray")
+        right_frame.place(x=600, y=0, width=400, height=600)
+
+        lblAddCourse = Label(right_frame, text="Thêm môn học",fg="red", bg="lightgray", font=("times new roman",20,"bold"))
+        lblAddCourse.place(x=0, y=30, relwidth=1)
+
+        lbl_2 = Label(right_frame, text="Tên môn học", bg="lightgray",fg="gray", font=("times new roman",12,"bold"))
+        lbl_2.place(x=70, y=150)
+
+        self.nameCourse = Entry(right_frame, bg="white", bd=1, font=("times new roman",12))
+        self.nameCourse.place(x=70,y=180, height=30, width=200)
+
+        lbl_3 = Label(right_frame, text="Thời gian bắt đầu", bg="lightgray",fg="gray", font=("times new roman",12,"bold"))
+        lbl_3.place(x=70, y=230)
+
+        x = datetime.now()
+        day = x.strftime("%d")
+        month = x.strftime("%m")
+        year = x.strftime("%Y")
+        timeNow = "{}/{}/{}".format(day, month, year)
+
+        self.startAtCourse = Label(right_frame,text=timeNow, bg="white", font=("times new roman",12))
+        self.startAtCourse.place(x=70,y=260, height=30, width=200)
+
+
+        lbl_4 = Label(right_frame, text="Ngày học", bg="lightgray",fg="gray", font=("times new roman",12,"bold"))
+        lbl_4.place(x=70, y=300)
+
+        # self.endCourse = Entry(right_frame, bg="white", bd=1, font=("times new roman",12))
+        # self.endCourse.place(x=0,y=330, height=30, width=200, relx=0.5, anchor=CENTER)
+
+        khoaList = ["Monday","Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        self.value_inside1 = StringVar(root)
+        self.value_inside1.set("Chọn ngày học")
+        self.dayMenu =  OptionMenu(right_frame, self.value_inside1, *khoaList)
+        self.dayMenu.config(font=("times new roman",12), bg="#e0dede", bd=0)
+        self.dayMenu.place(x=70, y=330, width=200)
+       
+        self.btnAddCourse = Button(right_frame,command=self.addCourse, text="Thêm", font=("times new roman",12))
+        self.btnAddCourse.place(x=70,y=400, width=200)
+
+
+    def addCourse(self):
+        nameCourse = self.nameCourse.get()
+        startAt = self.startAtCourse['text']
+        dayLearn = self.value_inside1.get()
+        # print(nameCourse,startAt, dayLearn)
+
+        if nameCourse.strip() == "":
+            messagebox.showerror("Thông báo", "Vui lòng nhập tên khóa học")
+        elif dayLearn == "Chọn ngày học":
+            messagebox.showerror("Thông báo", "Vui lòng chọn ngày học")
+        else:
+            try:
+                mydb = connection()
+                mycursor = mydb.cursor()
+
+                sql = "INSERT INTO courses (name, startAt, dayLearn) VALUES (%s, %s, %s)"
+                val = (nameCourse, startAt, dayLearn)
+
+                mycursor.execute(sql, val)
+
+                result = mydb.commit()
+
+                messagebox.showinfo("Thành công", "Thêm sinh viên thành công")   
+            except mysql.connector.Error as error:
+                messagebox.showerror("Thất lại", "Không thể thêm dữ liệu vào DB")  
+                print(error)  
+
+
+
+        # images = self.saveImage(filename,mssv)
+        # # images
+        # if ten == "":
+        #     messagebox.showerror("Thông báo", "Vui lòng nhập tên")
+        # elif mssv == "":
+        #     messagebox.showerror("Thông báo", "Vui lòng nhập mã sinh viên")
+        # elif lop == "":
+        #     messagebox.showerror("Thông báo", "Vui lòng nhập lớp")
+        # elif mssv == "" or khoa=="Chọn ngành học":
+        #     messagebox.showerror("Thông báo", "Vui lòng chọn khoa")
+        # else:
+        #     try:
+        #         mydb = connection()
+        #         mycursor = mydb.cursor()
+
+        #         sql = "INSERT INTO students (ten, mssv, lop, khoa, hinhanh) VALUES (%s, %s, %s, %s, %s)"
+        #         val = (ten, mssv, lop, khoa, images)
+
+        #         mycursor.execute(sql, val)
+
+        #         result = mydb.commit()
+
+        #         messagebox.showinfo("Thành công", "Thêm sinh viên thành công")   
+        #     except mysql.connector.Error as error:
+        #         messagebox.showerror("Thất lại", "Không thể thêm dữ liệu vào DB")  
+        #         print(error)   
 
 root = Tk()
 obj = Home(root)

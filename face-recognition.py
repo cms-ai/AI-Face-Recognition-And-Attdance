@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import face_recognition
 
-imgAi = face_recognition.load_image_file(r'ImagesAttandance\a-aitrain.jpg')
+imgAi = face_recognition.load_image_file(r'ImagesAttandance\\a-aitrain.jpg')
 imgAi =  cv2.cvtColor(imgAi, cv2.COLOR_BGR2RGB)
 imgTest = face_recognition.load_image_file(r'ImagesAttandance\18it048-ai-18it2.jpg')
 imgTest =  cv2.cvtColor(imgTest, cv2.COLOR_BGR2RGB)
