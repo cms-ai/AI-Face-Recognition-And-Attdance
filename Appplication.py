@@ -238,50 +238,76 @@ class Attandance:
         self.root.resizable(False, False)
 
         left_Frame = Frame(self.root, bg="white")
-        left_Frame.place(x=0,y=0,width=1000, height=350)
+        left_Frame.place(x=0,y=0,width=350, height=600)
 
         lbl_1 = Label(left_Frame, text="Điểm danh",fg="red", bg="white", font=("times new roman",28,"bold"))
         lbl_1.place(x=0, y=30, relwidth=1)
 
-        lbl_2 = Label(left_Frame, text="Họ và tên", bg="white",fg="gray", font=("times new roman",12,"bold"))
+        lbl_2 = Label(left_Frame, text="Tên môn học", bg="white",fg="gray", font=("times new roman",12,"bold"))
         lbl_2.place(x=80, y=100)
-
-        self.nameEntry = Label(left_Frame, bd=1, font=("times new roman",12))
-        self.nameEntry.place(x=80, y=130, height=40, width=180)
-
-        lbl_3 = Label(left_Frame, text="MSSV", bg="white",fg="gray", font=("times new roman",12,"bold"))
-        lbl_3.place(x=280, y=100)
-
-        self.MSVEntry = Label(left_Frame,  font=("times new roman",12))
-        self.MSVEntry.place(x=280, y=130, height=40, width=180)
-
-        lbl_4 = Label(left_Frame, text="Lớp", bg="white",fg="gray", font=("times new roman",12,"bold"))
-        lbl_4.place(x=480, y=100)
-
-        self.gradeEntry = Label(left_Frame,  font=("times new roman",12))
-        self.gradeEntry.place(x=480, y=130, height=40, width=180)
-
-        lbl_5 = Label(left_Frame, text="Khoa", bg="white",fg="gray", font=("times new roman",12,"bold"))
-        lbl_5.place(x=680, y=100)
-
-        self.khoaEntry = Label(left_Frame,  font=("times new roman",12))
-        self.khoaEntry.place(x=680, y=130, height=40, width=180)
         
-        self.btnDiemDannh = Button(left_Frame, command=self.Attendance, text="Bắt đầu điểm danh", font=("times new roman",12))
-        self.btnDiemDannh.place(x=0,y=280, width=400, height=50, relx=0.5, anchor=CENTER)
+       
+        khoaList = []
+        mydb = connection()
+        my_cursor = mydb.cursor()
+        my_cursor.execute("SELECT name from courses")
+        results = my_cursor.fetchall()
+        for x in results:
+            khoaList.append(x[0])
+        # for course in my_cursor:
+        #     print(my_cursor[course])
+        #     khoaList.append(course)
+        
+        # print(khoaList)
+        self.value_inside1 = StringVar(root)
+        self.value_inside1.set(khoaList[0])
+        self.dayMenu =  OptionMenu(left_Frame, self.value_inside1, *khoaList)
+        self.dayMenu.config(font=("times new roman",12), bg="#e0dede")
+        self.dayMenu.place(x=80,y=130, width=200, height=40)
 
+        # lbl_3 = Label(left_Frame, text="MSSV", bg="white",fg="gray", font=("times new roman",12,"bold"))
+        # lbl_3.place(x=280, y=100)
+        
+        x = datetime.now()
+        day = x.strftime("%d")
+        month = x.strftime("%m")
+        year = x.strftime("%Y")
+        self.timeNow = "{}/{}/{}".format(day, month, year)
 
-        right_Frame = Frame(self.root, bg="white")
-        right_Frame.place(x=0,y=352,width=1000, height=248)
+        lbl_3 = Label(left_Frame, text="Thời gian", bg="white",fg="gray", font=("times new roman",12,"bold"))
+        lbl_3.place(x=80, y=200)
 
-        self.tv = ttk.Treeview(right_Frame, columns=(1,2,3,4), show="headings", height=5)
-        self.tv.place(x=0, y=0, relwidth=1)
+        lbl_3 = Label(left_Frame, text=self.timeNow, bg="lightgray",fg="black", font=("times new roman",12,"bold"))
+        lbl_3.place(x=80, y=230, height=40, width=200)
 
-        self.tv.heading(1, text="Name")
-        self.tv.heading(2, text="Current Time")
-        self.tv.heading(3, text="Current Time")
-        self.tv.heading(4, text="Current Time")
-        self.tv.heading(5, text="Current Time")
+        self.btnDiemDannh = Button(left_Frame, command=self.Attendance, text="Điểm danh", font=("times new roman",12))
+        self.btnDiemDannh.place(x=80,y=300, width=200, height=40)
+
+        right_Frame = Frame(self.root, bg="lightgray")
+        right_Frame.place(x=351,y=0,width=670 ,height=600)
+
+        tableFrame = Frame(right_Frame, bg="white")
+        tableFrame.place(x=0, y=0, width=670, height=600)
+
+        
+        self.tree1 = ttk.Treeview(tableFrame, selectmode='browse')
+        self.tree1.place(x=20, y=30, height=500)
+
+        vsb =  Scrollbar(tableFrame, orient="vertical", command=self.tree1.yview)
+        vsb.place(x=30+600+2, y=30, height=500)
+
+        self.tree1.configure(yscrollcommand=vsb.set)
+
+        self.tree1["columns"] = ("1", "2", "3", "4")
+        self.tree1['show'] = 'headings'
+        self.tree1.column("1", width=200, anchor='c')
+        self.tree1.column("2", width=100, anchor='c')
+        self.tree1.column("3", width=100, anchor='c')
+        self.tree1.column("4", width=200, anchor='c')
+        self.tree1.heading("1", text="Tên")
+        self.tree1.heading("2", text="MSSV")
+        self.tree1.heading("3", text="Lớp")
+        self.tree1.heading("4", text="Khoa")
 
     def findEncode(self,images):
         encodeList = []
@@ -292,47 +318,82 @@ class Attandance:
             encodeList.append(encode)
         return encodeList
 
-    def markAttendance(self,name):
-        with open('Attendance.csv', 'r+', encoding='utf8') as f:
-            myDataList = f.readlines()
-            nameList = []
-            newList =  []
-            for line in myDataList:
-                entry = line.split(',')
-                nameList.append(entry[1])
-            print(nameList)
+    # def markAttendance(self,name):
+    #     with open('Attendance.csv', 'r+', encoding='utf8') as f:
+    #         myDataList = f.readlines()
+    #         nameList = []
+    #         newList =  []
+    #         for line in myDataList:
+    #             entry = line.split(',')
+    #             nameList.append(entry[1])
+    #         print(nameList)
             
-            infoAttList = []
-            newInfoArray = []
-            newInfoArray =name.upper().split('-')
+    #         infoAttList = []
+    #         newInfoArray = []
+    #         newInfoArray =name.upper().split('-')
 
-            mssv = newInfoArray[0]
-            # print("mảng thông tin ")
-            mydb = connection()
-            mycursor = mydb.cursor()
-            sql = "SELECT * FROM students WHERE mssv = %s"
-            val = (mssv, )
-            mycursor.execute(sql, val)
-            myresult = mycursor.fetchall()
-            for x in myresult:
-                i =0 
-                while i < len(x):
-                    newList.append(x[i])
-                    i+=1
+    #         mssv = newInfoArray[0]
+    #         # print("mảng thông tin ")
+    #         mydb = connection()
+    #         mycursor = mydb.cursor()
+    #         sql = "SELECT * FROM students WHERE mssv = %s"
+    #         val = (mssv, )
+    #         mycursor.execute(sql, val)
+    #         myresult = mycursor.fetchall()
+    #         for x in myresult:
+    #             i =0 
+    #             while i < len(x):
+    #                 newList.append(x[i])
+    #                 i+=1
             
-            print(nameList, mssv)
-            if mssv  not in nameList:
-                now = datetime.now()
-                dtString = now.strftime('%H:%M:%S')
-                f.writelines(f'\n{newList[1]},{newList[2]},{newList[3]},{newList[4]},{dtString}')
+    #         print(nameList, mssv)
+    #         if mssv  not in nameList:
+    #             now = datetime.now()
+    #             dtString = now.strftime('%H:%M:%S')
+    #             f.writelines(f'\n{newList[1]},{newList[2]},{newList[3]},{newList[4]},{dtString}')
             
+    def uploadDBAttandance(self, name, mssvList, thoigian, monhoc):
+        newList = []
+        mssv = name.upper().split('-')[0]
+        mydb = connection()
+        my_cursor = mydb.cursor()
+        sql = "SELECT * FROM students WHERE mssv = %s"
+        val = (mssv, )
+        my_cursor.execute(sql, val)
+        results =  my_cursor.fetchall()
+        for x in results:
+            i = 0
+            while i < len(x):
+                newList.append(x[i])
+                i+=1
+        if mssv not in mssvList:
+            mssvList.append(mssv)
+            sql1 = "INSERT INTO attendance (ten, mssv, lop, khoa, monhoc, thoigian) VALUES (%s, %s, %s, %s,%s,%s)"
+            val1 = (newList[1], newList[2], newList[3], newList[4], monhoc, thoigian)
+
+            my_cursor.execute(sql1,val1)
+            result = mydb.commit()
+        else:
+            print("Đã điểm danh")
 
     def Attendance(self):
         path = 'ImagesAttandance'
         images = []
         classNames = []
         myList = os.listdir(path)
+        mssvList = []
+        thoigian = self.timeNow
+        monhoc = self.value_inside1.get()
 
+        mydb = connection()
+        my_cursor = mydb.cursor()
+        sql = "SELECT mssv FROM attendance WHERE thoigian=%s AND monhoc=%s"
+        val = (thoigian,monhoc)
+        my_cursor.execute(sql, val)
+        results =  my_cursor.fetchall()
+        for x in results:
+            mssvList.append(x[0])
+        print(mssvList)
         for cl in myList:
             curImg = cv2.imread(f'{path}/{cl}')
             # print(curImg)
@@ -348,7 +409,6 @@ class Attandance:
             success, img = cap.read()
             imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
             imgS = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
             facesCurFrame = face_recognition.face_locations(imgS)
             encodesCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
 
@@ -364,10 +424,31 @@ class Attandance:
                     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     cv2.rectangle(img, (x1, y2-35), (x2, y2), (0, 255, 0), 2)
                     cv2.putText(img, name, (x1 + 6, y2-6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-                    self.markAttendance(name)
-
+                    # self.markAttendance(name)
+                    self.uploadDBAttandance(name, mssvList, thoigian, monhoc)
             cv2.imshow('Webcam', img)
-            cv2.waitKey(1)
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        cap.release()
+        cv2.destroyAllWindows()
+        self.showData(thoigian, monhoc)
+        
+       
+    def showData(self, thoigian, monhoc):
+        print(thoigian, monhoc)
+        mydb = connection()
+        my_cursor = mydb.cursor()
+        sql = "SELECT * FROM attendance WHERE thoigian= %s AND monhoc = %s"
+        val =  (thoigian, monhoc)
+        my_cursor.execute(sql, val)
+        i = 0
+        
+        for i in self.tree1.get_children():
+            self.tree1.delete(i)
+        for course in my_cursor:
+            self.tree1.insert("",'end', values=(course[1],course[2],course[3],course[4]))
+            
 
     
 
@@ -379,6 +460,7 @@ class Course:
         self.root.geometry("1000x600+200+50")
         self.root.resizable(False, False)
 
+            
         left_Frame = Frame(self.root, bg="white")
         left_Frame.place(x=0,y=0,width=600, height=600)
 
@@ -386,12 +468,37 @@ class Course:
         lbl_1 = Label(left_Frame, text="Quản lý môn học",fg="red", bg="white", font=("times new roman",28,"bold"))
         lbl_1.place(x=0, y=30, relwidth=1)
 
-        lbl_2 = Label(left_Frame, text="Course", bg="white",fg="gray", font=("times new roman",12,"bold"))
-        lbl_2.place(x=50, y=150)
+        tableFrame = Frame(left_Frame, bg="white")
+        tableFrame.place(x=0, y=100, width=600, height=600)
 
+        
+        self.tree = ttk.Treeview(tableFrame, selectmode='browse')
+        self.tree.place(x=20, y=10, height=400)
 
-        lbl_3 = Label(left_Frame, text="Start at", bg="white",fg="gray", font=("times new roman",12,"bold"))
-        lbl_3.place(x=250, y=150)
+        vsb =  Scrollbar(tableFrame, orient="vertical", command=self.tree.yview)
+        vsb.place(x=30+500+2, y=10, height=400)
+
+        self.tree.configure(yscrollcommand=vsb.set)
+
+        self.tree["columns"] = ("1", "2", "3", "4")
+        self.tree['show'] = 'headings'
+        self.tree.column("1", width=100, anchor='c')
+        self.tree.column("2", width=200, anchor='c')
+        self.tree.column("3", width=100, anchor='c')
+        self.tree.column("4", width=100, anchor='c')
+        self.tree.heading("1", text="Id")
+        self.tree.heading("2", text="Name")
+        self.tree.heading("3", text="Start At")
+        self.tree.heading("4", text="Day Learn")
+
+        self.showData()
+        # mydb = connection()
+        # my_cursor = mydb.cursor()
+        # my_cursor.execute("SELECT * FROM courses limit 0,10")
+        # i = 0
+        # for course in my_cursor:
+        #     self.tree.insert("",'end', values=(course[0],course[1],course[2],course[3]))
+
 
         right_frame = Frame(self.root,bg="lightgray")
         right_frame.place(x=600, y=0, width=400, height=600)
@@ -434,6 +541,24 @@ class Course:
         self.btnAddCourse = Button(right_frame,command=self.addCourse, text="Thêm", font=("times new roman",12))
         self.btnAddCourse.place(x=70,y=400, width=200)
 
+        self.btnReturn = Button(right_frame,command=self.returnPage, text="Quay lại", font=("times new roman",12))
+        self.btnReturn.place(x=70,y=400, width=200)
+
+    def returnPage(self):
+        self.root.withdraw()
+        topLevel1 =  Toplevel(self.root)
+        app1 = Home(topLevel1)        
+
+    def showData(self):
+        mydb = connection()
+        my_cursor = mydb.cursor()
+        my_cursor.execute("SELECT * FROM courses limit 0,10")
+        i = 0
+        
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        for course in my_cursor:
+            self.tree.insert("",'end', values=(course[0],course[1],course[2],course[3]))
 
     def addCourse(self):
         nameCourse = self.nameCourse.get()
@@ -458,38 +583,18 @@ class Course:
                 result = mydb.commit()
 
                 messagebox.showinfo("Thành công", "Thêm sinh viên thành công")   
+
+                self.showData()
             except mysql.connector.Error as error:
                 messagebox.showerror("Thất lại", "Không thể thêm dữ liệu vào DB")  
                 print(error)  
 
+    
+            
 
 
-        # images = self.saveImage(filename,mssv)
-        # # images
-        # if ten == "":
-        #     messagebox.showerror("Thông báo", "Vui lòng nhập tên")
-        # elif mssv == "":
-        #     messagebox.showerror("Thông báo", "Vui lòng nhập mã sinh viên")
-        # elif lop == "":
-        #     messagebox.showerror("Thông báo", "Vui lòng nhập lớp")
-        # elif mssv == "" or khoa=="Chọn ngành học":
-        #     messagebox.showerror("Thông báo", "Vui lòng chọn khoa")
-        # else:
-        #     try:
-        #         mydb = connection()
-        #         mycursor = mydb.cursor()
 
-        #         sql = "INSERT INTO students (ten, mssv, lop, khoa, hinhanh) VALUES (%s, %s, %s, %s, %s)"
-        #         val = (ten, mssv, lop, khoa, images)
 
-        #         mycursor.execute(sql, val)
-
-        #         result = mydb.commit()
-
-        #         messagebox.showinfo("Thành công", "Thêm sinh viên thành công")   
-        #     except mysql.connector.Error as error:
-        #         messagebox.showerror("Thất lại", "Không thể thêm dữ liệu vào DB")  
-        #         print(error)   
 
 root = Tk()
 obj = Home(root)
